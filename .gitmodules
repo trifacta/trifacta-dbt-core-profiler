@@ -1,0 +1,3 @@
+[submodule "libs/dbt"]
+	path = libs/dbt
+	url = https://github.com/fishtown-analytics/dbt.git

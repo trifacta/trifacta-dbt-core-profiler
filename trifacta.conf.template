@@ -1,0 +1,15 @@
+[DEFAULT]
+
+username =
+token =
+endpoint = https://cloud.trifacta.com
+filesystem_root =
+
+[DATAPREP]
+
+username =
+token =
+endpoint = https://api.clouddataprep.com
+type = dataprep
+filesystem_root =
+connection = BigQuery
