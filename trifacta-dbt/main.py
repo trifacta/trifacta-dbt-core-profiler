@@ -17,7 +17,6 @@ def main(args=None):
 
 
 def execute(args):
-    print(args)
     parsed = parse_args(args)
     parsed.cls.pre_init_hook(parsed)
 

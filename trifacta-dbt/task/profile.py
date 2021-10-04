@@ -7,6 +7,7 @@ from objects.connection import (
     mk_list_connections_request
 )
 from objects.dataset import (
+    is_supported_dataset,
     mk_import_dataset_request,
     mk_add_dataset_to_flow_request,
     mk_create_wrangled_dataset_request,
@@ -37,6 +38,12 @@ class ProfileTask(BaseTask):
         tfc = self.trifacta_config()
         tfr = self.trifacta()
         dbt = self.dbt()
+
+        dataset_count = count_importable_datasets(self.args.include_list, dbt)
+        c = single_yes_or_no_question(f"{dataset_count} datasets will be created and profiled. Continue?")
+        if not c:
+            return
+
         conn_id = self.connection_id(trifacta_prefix, tfr, dbt)
         print("Creating Flow: ", end="")
         sys.stdout.flush()
@@ -102,6 +109,18 @@ class ProfileTask(BaseTask):
         return conn_id
 
 
+def single_yes_or_no_question(question, default_no=True):
+    choices = ' [y/N]: ' if default_no else ' [Y/n]: '
+    default_answer = 'n' if default_no else 'y'
+    reply = str(input(question + choices)).lower().strip() or default_answer
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        return False
+    else:
+        return False if default_no else True
+
+
 def spinning_cursor():
     while True:
         for cursor in '|/-\\':
@@ -128,6 +147,16 @@ def lookup_connection(tfr, name):
         if conn['name'] == name:
             return conn
     raise Exception(f"Unable to find connection named {name}")
+
+
+def count_importable_datasets(include_list, dbt):
+    count = 0
+    for node in dbt.get_manifest().nodes.values():
+        if include_list and node.name not in include_list:
+            continue
+        if is_supported_dataset(node):
+            count = count + 1
+    return count
 
 
 def import_datasets(trifacta_prefix, include_list, tfc, tfr, dbt, conn_id, flow_id, fs_root, execution):

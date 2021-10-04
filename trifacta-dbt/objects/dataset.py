@@ -2,6 +2,16 @@ from dbt.contracts.graph.parsed import ParsedModelNode, ParsedSeedNode
 from trifacta.util.tfrequests import TrifactaEndpoint
 
 
+def is_supported_dataset(node):
+    if isinstance(node, ParsedModelNode):
+        if node.is_ephemeral:
+            return False
+        return node.get_materialization() == "table" or node.get_materialization() == "view"
+    elif isinstance(node, ParsedSeedNode):
+        return True
+    return False
+
+
 def mk_import_dataset_request(node, name, conn_id, tfc, dbt):
     jdbc_path = get_jdbc_path(tfc, dbt);
     if isinstance(node, ParsedModelNode):
