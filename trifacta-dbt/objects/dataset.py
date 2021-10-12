@@ -104,14 +104,25 @@ def mk_create_write_setting_request(path, oobj_id):
     return TrifactaEndpoint('POST', '/v4/writeSettings', req)
 
 
-def mk_create_publication_request(oobj_id, connection_id, tfc, dbt):
+def mk_create_publication_request(oobj_id, output_table_name, connection_id, tfc, dbt):
     path = get_jdbc_path(tfc, dbt)
     req = {
         "path": path,
-        "tableName": "temp_{}".format(oobj_id),
+        "tableName": output_table_name,
         "targetType": "bigquery",
         "action": "createAndLoad",
         "connectionId": connection_id,
         "outputObjectId": oobj_id
     }
     return TrifactaEndpoint('POST', '/v4/publications', req)
+
+
+def mk_create_sql_script(oobj_id, sql, type, vendor, connection_id):
+    req = {
+        "sqlScript": sql,
+        "type": type,
+        "vendor": vendor,
+        "outputObjectId": oobj_id,
+        "connection_id": connection_id
+    }
+    return TrifactaEndpoint('POST', '/v4/sqlScripts', req)

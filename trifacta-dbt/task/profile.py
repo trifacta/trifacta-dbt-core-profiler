@@ -13,7 +13,8 @@ from objects.dataset import (
     mk_create_wrangled_dataset_request,
     mk_create_output_object_request,
     mk_create_write_setting_request,
-    mk_create_publication_request
+    mk_create_publication_request,
+    mk_create_sql_script
 )
 from objects.flow import mk_create_flow_request
 from objects.job import (
@@ -87,10 +88,13 @@ class ProfileTask(BaseTask):
                         break
                     time.sleep(0.5)
                     sys.stdout.write('\b')
+            link_hostname = "cloud.trifacta.com"
+            if tfc["type"] == "dataprep":
+                link_hostname = "clouddataprep.com"
             if fail:
                 print("FAILED")
             else:
-                print(f"SUCCESS -> https://cloud.trifacta.com/jobs/{jobgroup_id}?activeTab=profile")
+                print(f"SUCCESS -> https://{link_hostname}/jobs/{jobgroup_id}?activeTab=profile")
 
     def connection_id(self, trifacta_prefix, tfr, dbt):
         tf_config = self.trifacta_config()
@@ -183,8 +187,11 @@ def import_datasets(trifacta_prefix, include_list, tfc, tfr, dbt, conn_id, flow_
             oobj_res = oobj_ep.invoke(tfr).json()
             oobj_id = oobj_res['id']
             if tfc["type"] == "dataprep":
-                pub_ep = mk_create_publication_request(oobj_id, conn_id, tfc, dbt)
+                output_table_name = "trifacta_dbt_temp_{}".format(oobj_id)
+                pub_ep = mk_create_publication_request(oobj_id, output_table_name, conn_id, tfc, dbt)
                 pub_ep.invoke(tfr)
+                sql_ep = mk_create_sql_script(oobj_id, "DROP TABLE `{}`.`{}`".format(dbt.config.credentials.schema, output_table_name), "post", "bigquery", conn_id)
+                sql_ep.invoke(tfr)
             else:
                 out_path = '{}/{}_{}_out.csv'.format(fs_root, name_prefix, node.name)
                 ws_ep = mk_create_write_setting_request(out_path, oobj_id)
