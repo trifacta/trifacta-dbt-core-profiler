@@ -178,7 +178,7 @@ def parse_args(args):
 
     _build_diagnostics_subparser(subs, base_parser)
     _build_profile_subparser(subs, base_parser)
-    _build_clean_subparser(subs, base_parser)
+    #_build_clean_subparser(subs, base_parser)
 
     if len(args) == 0:
         p.print_help()
