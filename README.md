@@ -94,3 +94,7 @@ A: The utility sends Dataprep the BigQuery connection information located in you
 ### Q: Will I be charged for running profiles?
 
  A: The utility makes temporary copies of your datasets, and issues queries against each column in the dataset to generate the profiling reports. Each dataset copy is then deleted after each profile report is created to significantly reduce storage costs. Temporary storage and profile queries are subject to BigQuery's Storage and Analysis pricing.
+
+# License
+
+This software is open sourced under the Apache Software License 2.0
